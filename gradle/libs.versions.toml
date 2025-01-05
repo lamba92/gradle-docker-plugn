@@ -1,0 +1,10 @@
+[versions]
+gradle-publish-plugin = "1.3.0"
+junit = "5.11.4"
+
+[libraries]
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+[plugins]
+gradle-publish-plugin = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish-plugin" }

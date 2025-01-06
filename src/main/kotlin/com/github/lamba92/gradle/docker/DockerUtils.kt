@@ -3,10 +3,12 @@ package com.github.lamba92.gradle.docker
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 
-inline fun <reified T : Task> TaskContainer.getOrRegister(name: String, noinline action: T.() -> Unit): TaskProvider<T> {
+@JvmName("getOrRegisterTyped")
+internal inline fun <reified T : Task> TaskContainer.getOrRegister(name: String, noinline action: T.() -> Unit): TaskProvider<T> {
     if (name in names) return named<T>(name)
     return register<T>(name, action)
 }
@@ -43,3 +45,19 @@ plugins {
 
 fun <T> MutableList<T>.addAll(vararg elements: T) =
     addAll(elements)
+
+fun getJavaMajorVersion(): String {
+    val javaVersion = System.getProperty("java.version")
+    // Check if it starts directly with the major version
+    return when (val majorVersion = javaVersion?.substringBefore('.')) {
+        // If the first part is `1` (Java 8 or below), get the second number
+        "1" -> javaVersion.substringAfter('.').substringBefore('.')
+        null -> "8"
+        else -> majorVersion
+    }
+}
+
+fun String.toCamelCase() =
+    split(Regex("[\\s\\-_.]+")) // Split by spaces, hyphens, underscores, or dots
+    .filter { it.isNotEmpty() }          // Remove empty segments
+    .joinToString("") { it.lowercase().capitalized() }

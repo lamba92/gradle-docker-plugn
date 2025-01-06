@@ -10,7 +10,6 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
@@ -70,7 +69,7 @@ fun Project.configureLogin(dockerExtension: DockerExtension) {
     }
 
     dockerExtension.registries.all {
-        val dockerLoginTaskName = "dockerLogin${registryName.capitalized()}"
+        val dockerLoginTaskName = "dockerLogin${registryName.toCamelCase()}"
         val loginTask = tasks.register<Exec>(dockerLoginTaskName) {
             group = "docker"
             executable = "docker"
@@ -91,7 +90,7 @@ private fun Project.configurePlugin(
     dockerBuildxPublishAllTask: TaskProvider<Task>
 ) {
     dockerExtension.images.all {
-        val dockerPrepareTaskName = "dockerPrepare${imageName.get().capitalized()}"
+        val dockerPrepareTaskName = "dockerPrepare${imageName.get().toCamelCase()}"
 
         val dockerPrepareDir =
             project
@@ -104,7 +103,7 @@ private fun Project.configurePlugin(
             into(dockerPrepareDir)
         }
         val baseTag = "${imageName.get()}:${imageVersion.get()}"
-        val dockerBuildTaskName = "dockerBuild${imageName.get().capitalized()}"
+        val dockerBuildTaskName = "dockerBuild${imageName.get().toCamelCase()}"
         val dockerBuildTask = tasks.register<Exec>(dockerBuildTaskName) {
             group = "build"
             dependsOn(dockerPrepareTask)
@@ -153,7 +152,7 @@ private fun Project.configureBuildx(
     dockerBuildxAllTask: TaskProvider<Task>,
     dockerBuildxPublishAllTask: TaskProvider<Task>
 ) {
-    val dockerBuildxTaskName = "dockerBuildxBuild${dockerImage.imageName.get().capitalized()}"
+    val dockerBuildxTaskName = "dockerBuildxBuild${dockerImage.imageName.get().toCamelCase()}"
     fun buildxArgs(publish: Boolean) = buildList {
         addAll("buildx", "build")
         dockerImage.platforms.get()

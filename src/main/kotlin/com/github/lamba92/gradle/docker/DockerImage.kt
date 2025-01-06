@@ -8,7 +8,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Sync
-import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.mapProperty
@@ -56,22 +55,13 @@ class DockerImage(
             return
         }
 
-        val actualJdkVersion =
-            baseImageTag
-                ?: System.getProperty("java.version")
-                    ?.split(".")
-                    ?.firstOrNull()
-
-        if (actualJdkVersion == null) {
-            project.logger.error("No image version provided when configuring JVM Application for Docker image '$name'")
-            return
-        }
+        val actualJdkVersion = baseImageTag ?: getJavaMajorVersion()
 
         val createDockerfileTaskName = buildString {
             append("create")
-            append(project.name.capitalized())
-            append(baseImageName.capitalized())
-            append(actualJdkVersion.capitalized())
+            append(project.name.toCamelCase())
+            append(baseImageName.toCamelCase())
+            append(actualJdkVersion)
             append("JvmAppDockerfile")
         }
 
@@ -81,7 +71,10 @@ class DockerImage(
                 imageTag = actualJdkVersion
                 imageName = baseImageName
                 destinationFile =
-                    project.layout.buildDirectory.file("dockerfiles/${project.name}-$imageName-$imageTag.dockerfile")
+                    project
+                        .layout
+                        .buildDirectory
+                        .file("dockerfiles/${project.name}-${imageName.get()}-${imageTag.get()}.dockerfile")
             }
 
         files {

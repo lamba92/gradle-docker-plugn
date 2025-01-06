@@ -13,19 +13,18 @@ kotlin {
 }
 
 gradlePlugin {
-    website = ""
-    vcsUrl = ""
+    website = "https://github.com/lamba92/gradle-docker-plugn"
+    vcsUrl = "https://github.com/lamba92/gradle-docker-plugn"
     plugins {
         create("dockerPlugin") {
             id = "gradle-docker-plugin"
+            displayName = "Gradle Docker Plugin"
             implementationClass = "com.github.lamba92.gradle.docker.DockerPlugin"
             tags = listOf("docker", "ci/cd", "container", "jvm")
             description = "Integrate seamlessly Docker in your build."
         }
     }
-
 }
-
 
 dependencies {
     testImplementation(gradleTestKit())
@@ -37,5 +36,9 @@ dependencies {
 tasks {
     withType<Test> {
         useJUnitPlatform()
+        environment(
+            "TEST_PROJECT_PATH",
+            rootProject.layout.projectDirectory.dir("test-project").asFile.absolutePath
+        )
     }
 }

@@ -17,6 +17,6 @@ enum class DockerPlatform(val commandLineValue: String) {
 
     companion object {
         fun fromCommandLineValue(value: String): DockerPlatform? =
-            entries.find { it.commandLineValue == value }
+            values().find { it.commandLineValue == value }
     }
 }

@@ -7,11 +7,9 @@ import org.gradle.api.plugins.ExtensionAware
 abstract class DockerExtension(
     private val name: String,
     val images: NamedDomainObjectContainer<DockerImage>,
-    val registries: RegistriesContainer
+    val registries: RegistriesContainer,
 ) : ExtensionAware, Named {
     override fun getName() = name
+
+    fun registries(action: RegistriesContainer.() -> Unit) = registries.apply(action)
 }
-
-operator fun RegistriesContainer.invoke(action: RegistriesContainer.() -> Unit) =
-    apply(action)
-

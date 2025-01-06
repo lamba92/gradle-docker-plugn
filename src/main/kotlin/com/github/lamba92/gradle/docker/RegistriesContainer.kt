@@ -1,12 +1,13 @@
+@file:Suppress("ktlint:standard:no-unused-imports")
+
 package com.github.lamba92.gradle.docker
 
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.kotlin.dsl.assign
 
 class RegistriesContainer(
-    private val delegate: NamedDomainObjectContainer<DockerRegistry>
+    private val delegate: NamedDomainObjectContainer<DockerRegistry>,
 ) : NamedDomainObjectContainer<DockerRegistry> by delegate {
-
     companion object {
         const val DOCKER_HUB = "dockerHub"
         const val AMAZON_ECR = "amazonEcr"
@@ -18,17 +19,18 @@ class RegistriesContainer(
         if (DOCKER_HUB !in names) register(DOCKER_HUB)
 
         named(DOCKER_HUB) {
-            url = "https://index.docker.io/v1/"
-            imageTagPrefix = "$username/"
+            imageTagPrefix = username
         }
     }
 
-    fun amazonEcr(accountId: String, region: String) {
+    fun amazonEcr(
+        accountId: String,
+        region: String,
+    ) {
         if (AMAZON_ECR !in names) register(AMAZON_ECR)
 
         named(AMAZON_ECR) {
-            url = "$accountId.dkr.ecr.$region.amazonaws.com"
-            imageTagPrefix = "$accountId/"
+            imageTagPrefix = "$accountId.dkr.ecr.$region.amazonaws.com"
         }
     }
 
@@ -36,24 +38,19 @@ class RegistriesContainer(
         if (GITHUB_CONTAINER_REGISTRY !in names) register(GITHUB_CONTAINER_REGISTRY)
 
         named(GITHUB_CONTAINER_REGISTRY) {
-            url = "https://ghcr.io"
-            imageTagPrefix = "$username/"
+            imageTagPrefix = "ghcr.io/$username"
         }
     }
 
     fun googleArtifactRegistry(
         projectId: String,
-        location: String,
-        repositoryId: String,
+        region: String,
+        repositoryName: String,
     ) {
         if (GOOGLE_ARTIFACT_REGISTRY !in names) register(GOOGLE_ARTIFACT_REGISTRY)
 
         named(GOOGLE_ARTIFACT_REGISTRY) {
-            url = "$location-docker.pkg.dev"
-            imageTagPrefix = "$projectId/$repositoryId/"
+            imageTagPrefix = "$region-docker.pkg.dev/$projectId/$repositoryName"
         }
     }
 }
-
-
-

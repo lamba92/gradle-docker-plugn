@@ -27,7 +27,6 @@ class DockerImage(
     val imageVersion: Property<String> =
         project.objects
             .property<String>()
-            .convention(project.provider { project.version.toString() })
 
     val buildArgs: MapProperty<String, String> =
         project.objects.mapProperty()
@@ -55,7 +54,7 @@ class DockerImage(
             return
         }
 
-        val actualJdkVersion = baseImageTag ?: getJavaMajorVersion()
+        val actualJdkVersion = baseImageTag ?: "${getJavaMajorVersion()}-alpine"
 
         val createDockerfileTaskName = buildString {
             append("create")

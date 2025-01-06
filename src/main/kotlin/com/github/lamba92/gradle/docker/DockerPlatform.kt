@@ -10,7 +10,7 @@ enum class DockerPlatform(val commandLineValue: String) {
     LINUX_RISCV64("linux/riscv64"),   // RISC-V 64-bit architecture
 
     WINDOWS_AMD64("windows/amd64"),   // 64-bit Windows
-    WINDOWS_ARM64("windows/arm64"),   // ARM64 for Windows (less common)
+    WINDOWS_ARM64("windows/arm64"),   // ARM64 for Windows
 
     DARWIN_AMD64("darwin/amd64"),     // 64-bit x86 architecture for macOS
     DARWIN_ARM64("darwin/arm64");     // ARM64 architecture for macOS (e.g., Apple Silicon)
@@ -18,5 +18,8 @@ enum class DockerPlatform(val commandLineValue: String) {
     companion object {
         fun fromCommandLineValue(value: String): DockerPlatform? =
             values().find { it.commandLineValue == value }
+
+        fun defaults() =
+            listOf(LINUX_AMD64, LINUX_ARM64)
     }
 }

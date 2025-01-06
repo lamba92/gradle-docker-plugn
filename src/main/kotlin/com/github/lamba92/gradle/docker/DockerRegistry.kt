@@ -8,8 +8,6 @@ class DockerRegistry(
     val registryName: String,
     objectFactory: ObjectFactory
 ) : Named {
-    val username = objectFactory.property<String>()
-    val password = objectFactory.property<String>()
     val imageTagPrefix = objectFactory.property<String>()
     val url = objectFactory.property<String>()
 

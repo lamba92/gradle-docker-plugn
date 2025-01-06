@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.lamba92"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 kotlin {
     jvmToolchain(8)
@@ -16,3 +16,14 @@ kotlin {
 application {
     mainClass = "com.github.lamba92.gradle.docker.tests.MainKt"
 }
+
+docker {
+    registries {
+        create("local") {
+            url = "http://registry"
+            imageTagPrefix = "registry"
+        }
+    }
+}
+
+println("SCRIPT PROJECT VERSION: $version")

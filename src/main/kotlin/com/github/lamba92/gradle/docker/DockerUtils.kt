@@ -61,3 +61,6 @@ fun String.toCamelCase() =
     split(Regex("[\\s\\-_.]+")) // Split by spaces, hyphens, underscores, or dots
     .filter { it.isNotEmpty() }          // Remove empty segments
     .joinToString("") { it.lowercase().capitalized() }
+
+fun String.suffixIfNot(string: String): String =
+    if (endsWith(string)) this else "$this$string"

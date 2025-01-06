@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package com.github.lamba92.gradle.docker
 
 import org.gradle.api.Plugin
@@ -39,46 +37,32 @@ class DockerPlugin : Plugin<Project> {
             group = "build"
         }
 
-        val dockerBuildxAllTask = tasks.register("dockerBuildx") {
-            group = "build"
-        }
-
-        val dockerBuildxPublishAllTask = tasks.register("dockerBuildxPublish") {
-            group = "build"
-        }
-
-        val dockerPublishAll = tasks.register("dockerPublish") {
+        val dockerPublishAll = tasks.register("dockerPush") {
             group = "publishing"
         }
 
-        configureLogin(dockerExtension)
+        val dockerBuildxBuildAllTask = tasks.register("dockerBuildxBuild") {
+            group = "build"
+        }
+
+        val dockerBuildxPublishAllTask = tasks.register("dockerBuildxPush") {
+            group = "publishing"
+        }
 
         tasks.register<Exec>("createBuildxBuilder") {
             group = "docker"
             executable = "docker"
             args("buildx", "create", "--name", "gradle-builder", "--use")
+            isIgnoreExitValue = true
         }
 
-        configurePlugin(dockerExtension, dockerBuildAllTask, dockerPublishAll, dockerBuildxAllTask, dockerBuildxPublishAllTask)
-    }
-}
-
-fun Project.configureLogin(dockerExtension: DockerExtension) {
-    val dockerLoginAll = tasks.register("dockerLogin") {
-        group = "docker"
-    }
-
-    dockerExtension.registries.all {
-        val dockerLoginTaskName = "dockerLogin${registryName.toCamelCase()}"
-        val loginTask = tasks.register<Exec>(dockerLoginTaskName) {
-            group = "docker"
-            executable = "docker"
-            args("login", "-u", username.get(), "-p", password.get(), url.get())
-        }
-
-        dockerLoginAll {
-            dependsOn(loginTask)
-        }
+        configurePlugin(
+            dockerExtension = dockerExtension,
+            dockerBuildAllTask = dockerBuildAllTask,
+            dockerPublishAll = dockerPublishAll,
+            dockerBuildxBuildAllTask = dockerBuildxBuildAllTask,
+            dockerBuildxPublishAllTask = dockerBuildxPublishAllTask
+        )
     }
 }
 
@@ -86,7 +70,7 @@ private fun Project.configurePlugin(
     dockerExtension: DockerExtension,
     dockerBuildAllTask: TaskProvider<Task>,
     dockerPublishAll: TaskProvider<Task>,
-    dockerBuildxAllTask: TaskProvider<Task>,
+    dockerBuildxBuildAllTask: TaskProvider<Task>,
     dockerBuildxPublishAllTask: TaskProvider<Task>
 ) {
     dockerExtension.images.all {
@@ -102,7 +86,10 @@ private fun Project.configurePlugin(
             with(files.get())
             into(dockerPrepareDir)
         }
-        val baseTag = "${imageName.get()}:${imageVersion.get()}"
+        val baseTag = provider {
+            val actualImageVersion = imageVersion.orElse(project.version.toString()).get()
+            "${imageName.get()}:$actualImageVersion"
+        }
         val dockerBuildTaskName = "dockerBuild${imageName.get().toCamelCase()}"
         val dockerBuildTask = tasks.register<Exec>(dockerBuildTaskName) {
             group = "build"
@@ -114,9 +101,9 @@ private fun Project.configurePlugin(
                 buildArgs.get().forEach { (key, value) ->
                     addAll("--build-arg", "$key=$value")
                 }
-                addAll("-t", baseTag)
+                addAll("-t", baseTag.get().toString())
                 dockerExtension.registries.forEach { registry ->
-                    addAll("-t", "${registry.imageTagPrefix.get()}$baseTag")
+                    addAll("-t", "${registry.imageTagPrefix.get()}${baseTag.get()}")
                 }
                 add(dockerPrepareDir.get().asFile.absolutePath)
             })
@@ -130,7 +117,8 @@ private fun Project.configurePlugin(
             dockerExtension = dockerExtension,
             dockerImage = this,
             dockerPublishAll = dockerPublishAll,
-            baseTag = baseTag
+            baseTag = baseTag,
+            dockerBuildTask = dockerBuildTask
         )
 
         configureBuildx(
@@ -138,7 +126,7 @@ private fun Project.configurePlugin(
             dockerExtension = dockerExtension,
             baseTag = baseTag,
             dockerPrepareDir = dockerPrepareDir,
-            dockerBuildxAllTask = dockerBuildxAllTask,
+            dockerBuildxAllTask = dockerBuildxBuildAllTask,
             dockerBuildxPublishAllTask = dockerBuildxPublishAllTask
         )
     }
@@ -147,7 +135,7 @@ private fun Project.configurePlugin(
 private fun Project.configureBuildx(
     dockerImage: DockerImage,
     dockerExtension: DockerExtension,
-    baseTag: String,
+    baseTag: Provider<String>,
     dockerPrepareDir: Provider<Directory>,
     dockerBuildxAllTask: TaskProvider<Task>,
     dockerBuildxPublishAllTask: TaskProvider<Task>
@@ -163,10 +151,13 @@ private fun Project.configureBuildx(
             addAll("--build-arg", "$key=$value")
         }
         dockerExtension.registries.forEach { registry ->
-            addAll("--tag", "${registry.imageTagPrefix.get()}$baseTag")
+            addAll("--tag", "${registry.imageTagPrefix.get().suffixIfNot("/")}${baseTag.get()}")
         }
-        if (publish) this.add("--push")
-        this.add(dockerPrepareDir.get().asFile.absolutePath)
+        when {
+            publish -> add("--push")
+            else ->  add("--load")
+        }
+        add(dockerPrepareDir.get().asFile.absolutePath)
     }
 
     val dockerBuildxBuildTask = tasks.register<Exec>(dockerBuildxTaskName) {
@@ -219,14 +210,16 @@ private fun Project.configurePublication(
     dockerExtension: DockerExtension,
     dockerImage: DockerImage,
     dockerPublishAll: TaskProvider<Task>,
-    baseTag: String
+    baseTag: Provider<String>,
+    dockerBuildTask: TaskProvider<Exec>
 ) {
     dockerExtension.registries.all {
         val dockerPublishTaskName = "dockerPublish${dockerImage.imageName.get()}To$registryName"
         val dockerPublishTask = tasks.register<Exec>(dockerPublishTaskName) {
+            dependsOn(dockerBuildTask)
             group = "publishing"
             executable = "docker"
-            args("push", "${imageTagPrefix.get()}/$baseTag")
+            args("push", "${imageTagPrefix.get().suffixIfNot("/")}${baseTag.get()}")
         }
 
         val publishAllToThisRepositoryTaskName = "publishAllImagesTo$registryName"

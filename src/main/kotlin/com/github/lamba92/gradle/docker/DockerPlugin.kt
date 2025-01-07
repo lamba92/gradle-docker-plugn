@@ -28,13 +28,13 @@ class DockerPlugin : Plugin<Project> {
                 extensions.create<DockerExtension>(
                     EXTENSION_NAME,
                     EXTENSION_NAME,
-                    container { DockerImage(it, project) },
-                    RegistriesContainer(container { DockerRegistry(it, objects) }),
+                    DockerImagesContainer(container { DockerImage(it, project) }),
+                    DockerRegistriesContainer(container { DockerRegistry(it, objects) }),
                 )
 
             dockerExtension.images.register("main") {
                 imageName = project.name
-                if (plugins.hasPlugin("org.gradle.application")) configureJvmApplication()
+                plugins.withId("org.gradle.application") { configureJvmApplication() }
             }
 
             val dockerBuildAllTask =
@@ -164,7 +164,7 @@ private fun Project.configureBuildx(
             addAll("buildx", "build")
             dockerImage.platforms.get()
                 .takeIf { it.isNotEmpty() }
-                ?.joinToString(",") { it.commandLineValue }
+                ?.joinToString(",")
                 ?.let { addAll("--platform", it) }
             dockerImage.buildArgs.get().forEach { (key, value) ->
                 addAll("--build-arg", "$key=$value")

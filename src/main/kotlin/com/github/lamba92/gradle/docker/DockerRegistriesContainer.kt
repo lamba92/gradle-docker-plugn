@@ -5,7 +5,7 @@ package com.github.lamba92.gradle.docker
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.kotlin.dsl.assign
 
-class RegistriesContainer(
+class DockerRegistriesContainer(
     private val delegate: NamedDomainObjectContainer<DockerRegistry>,
 ) : NamedDomainObjectContainer<DockerRegistry> by delegate {
     companion object {

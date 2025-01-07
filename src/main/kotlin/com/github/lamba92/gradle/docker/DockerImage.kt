@@ -20,6 +20,17 @@ class DockerImage(
     private val name: String,
     private val project: Project,
 ) : Named {
+    companion object DockerPlatform {
+        const val LINUX_AMD64 = "linux/amd64"
+        const val LINUX_ARM64 = "linux/arm64"
+        const val LINUX_ARM64_V8 = "linux/arm64/v8"
+        const val LINUX_ARM_V7 = "linux/arm/v7"
+        const val LINUX_ARM_V6 = "linux/arm/v6"
+        const val LINUX_S390X = "linux/s390x"
+        const val LINUX_PPC64LE = "linux/ppc64le"
+        const val LINUX_386 = "linux/386"
+    }
+
     val isLatestTag: Property<Boolean> =
         project.objects
             .property<Boolean>()
@@ -37,10 +48,10 @@ class DockerImage(
     val buildArgs: MapProperty<String, String> =
         project.objects.mapProperty()
 
-    val platforms: ListProperty<DockerPlatform> =
+    val platforms: ListProperty<String> =
         project.objects
-            .listProperty<DockerPlatform>()
-            .convention(DockerPlatform.defaults())
+            .listProperty<String>()
+            .convention(listOf(LINUX_AMD64, LINUX_ARM64_V8))
 
     val files =
         project.objects.property<CopySpec>()
@@ -54,8 +65,8 @@ class DockerImage(
     }
 
     fun configureJvmApplication(
-        baseImageName: String = "openjdk",
-        baseImageTag: String? = null,
+        baseImageName: String = "eclipse-temurin",
+        baseImageTag: String = "21-alpine",
     ) {
         val hasApplicationPlugin = project.plugins.hasPlugin("org.gradle.application")
         if (!hasApplicationPlugin) {
@@ -63,21 +74,19 @@ class DockerImage(
             return
         }
 
-        val actualJdkVersion = baseImageTag ?: "${getJavaMajorVersion()}-alpine"
-
         val createDockerfileTaskName =
             buildString {
                 append("create")
                 append(project.name.toCamelCase())
                 append(baseImageName.toCamelCase())
-                append(actualJdkVersion.toCamelCase())
+                append(baseImageTag.toCamelCase())
                 append("JvmAppDockerfile")
             }
 
         val createDockerfileTask =
             project.tasks.getOrRegister<CreateJvmDockerfile>(createDockerfileTaskName) {
                 appName = project.name
-                imageTag = actualJdkVersion
+                imageTag = baseImageTag
                 imageName = baseImageName
                 destinationFile =
                     project

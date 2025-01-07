@@ -16,7 +16,7 @@ internal inline fun <reified T : Task> TaskContainer.getOrRegister(
     return register<T>(name, action)
 }
 
-fun TaskContainer.getOrRegister(
+internal fun TaskContainer.getOrRegister(
     name: String,
     action: (Task.() -> Unit)? = null,
 ): TaskProvider<Task> {
@@ -24,11 +24,20 @@ fun TaskContainer.getOrRegister(
     return action?.let { register(name, it) } ?: register(name)
 }
 
-fun jvmAppDockerImageString(
+/**
+ * Generates a Dockerfile as string for a JVM-based application.
+ *
+ * @param imageName The base Docker image name.
+ * @param imageTag The tag of the base Docker image.
+ * @param appName The name of the JVM application.
+ * @return A formatted Dockerfile string configured with the specified image details and application setup.
+ */
+internal fun jvmAppDockerImageString(
     imageName: String,
     imageTag: String,
     appName: String,
-) = """
+): String =
+    """
     FROM $imageName:$imageTag
 
     COPY bin $appName/bin
@@ -37,10 +46,11 @@ fun jvmAppDockerImageString(
     CMD ["$appName/bin/$appName"]
     """.trimIndent()
 
-fun getJvmAppErrorMessage(
+public fun getJvmAppErrorMessage(
     imageName: String,
     projectPath: String,
-) = """
+): String =
+    """
     To configure Docker image '$imageName' as a JVM App you need to apply the Gradle 'application' plugin.
     Add 'application' to the plugins block in the script of project $projectPath:
 
@@ -51,22 +61,11 @@ fun getJvmAppErrorMessage(
     ```
     """.trimIndent()
 
-fun <T> MutableList<T>.addAll(vararg elements: T) = addAll(elements)
+internal fun <T> MutableList<T>.addAll(vararg elements: T) = addAll(elements)
 
-fun getJavaMajorVersion(): String {
-    val javaVersion = System.getProperty("java.version")
-    // Check if it starts directly with the major version
-    return when (val majorVersion = javaVersion?.substringBefore('.')) {
-        // If the first part is `1` (Java 8 or below), get the second number
-        "1" -> javaVersion.substringAfter('.').substringBefore('.')
-        null -> "21"
-        else -> majorVersion
-    }
-}
-
-fun String.toCamelCase() =
+internal fun String.toCamelCase() =
     split(Regex("[\\s\\-_.]+")) // Split by spaces, hyphens, underscores, or dots
         .filter { it.isNotEmpty() } // Remove empty segments
         .joinToString("") { it.lowercase().capitalized() }
 
-fun String.suffixIfNot(string: String): String = if (endsWith(string)) this else "$this$string"
+internal fun String.suffixIfNot(string: String): String = if (endsWith(string)) this else "$this$string"

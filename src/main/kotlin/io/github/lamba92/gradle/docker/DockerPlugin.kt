@@ -16,10 +16,46 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.register
 
-@Suppress("unused")
-class DockerPlugin : Plugin<Project> {
-    companion object {
-        const val EXTENSION_NAME = "docker"
+/**
+ * A Gradle plugin for simplifying Docker image creation and management within a project.
+ *
+ * The plugin provides a mechanism for defining and configuring Docker images and registries
+ * as well as creating associated Gradle tasks for building and publishing Docker images.
+ *
+ * ## Key Features:
+ * - Registers a `docker` extension where users can configure images and registries.
+ * - Automatically creates tasks:
+ *   - `dockerBuild`: Groups tasks responsible for building Docker images.
+ *   - `dockerPush`: Groups tasks responsible for publishing Docker images.
+ *
+ * - Adds additional Gradle tasks for Docker's Buildx:
+ *   - `dockerBuildxBuild`: Groups tasks for building images using Buildx.
+ *   - `dockerBuildxPush`: Groups tasks for pushing Buildx-built images.
+ *
+ * ## Extension:
+ * The plugin registers a `docker` extension of type [DockerExtension].
+ * This provides:
+ * - `images`: A container for Docker image definitions.
+ * - `registries`: A container for Docker registry configurations.
+ *
+ * Example usage can include registering additional Docker images or modifying default configurations.
+ *
+ * ## Default Behavior:
+ * - Automatically registers a default `main` image configuration with the project extensionName as the image extensionName.
+ * - If the `org.gradle.application` plugin is applied, the default image configuration will be automatically
+ *   adjusted to support creating a Dockerfile for JVM applications.
+ *
+ * ## Tasks:
+ * The following tasks are provided by default:
+ * - `dockerBuild`: Aggregates all tasks related to building Docker images.
+ * - `dockerPush`: Aggregates all tasks related to pushing Docker images to registries.
+ * - `dockerBuildxBuild`: Aggregates tasks for building images using Buildx.
+ * - `dockerBuildxPush`: Aggregates tasks for pushing Buildx-built images.
+ * - `createBuildxBuilder`: Creates and uses a Docker Buildx builder.
+ */
+public class DockerPlugin : Plugin<Project> {
+    public companion object {
+        public const val EXTENSION_NAME: String = "docker"
     }
 
     override fun apply(target: Project): Unit =
@@ -28,8 +64,8 @@ class DockerPlugin : Plugin<Project> {
                 extensions.create<DockerExtension>(
                     EXTENSION_NAME,
                     EXTENSION_NAME,
-                    DockerImagesContainer(container { DockerImage(it, project) }),
-                    DockerRegistriesContainer(container { DockerRegistry(it, objects) }),
+                    DockerImageContainer(container { DockerImage(it, project) }),
+                    DockerRegistryContainer(container { DockerRegistry(it, objects) }),
                 )
 
             dockerExtension.images.register("main") {
@@ -56,13 +92,6 @@ class DockerPlugin : Plugin<Project> {
                 tasks.register("dockerBuildxPush") {
                     group = "publishing"
                 }
-
-            tasks.register<Exec>("createBuildxBuilder") {
-                group = "docker"
-                executable = "docker"
-                args("buildx", "create", "--name", "gradle-builder", "--use")
-                isIgnoreExitValue = true
-            }
 
             configurePlugin(
                 dockerExtension = dockerExtension,

@@ -15,11 +15,11 @@ class DockerRegistriesContainer(
         const val GOOGLE_ARTIFACT_REGISTRY = "googleArtifactRegistry"
     }
 
-    fun dockerHub(username: String) {
+    fun dockerHub(dockerHubUsername: String) {
         if (DOCKER_HUB !in names) register(DOCKER_HUB)
 
         named(DOCKER_HUB) {
-            imageTagPrefix = username
+            imageTagPrefix = dockerHubUsername
         }
     }
 
@@ -34,23 +34,25 @@ class DockerRegistriesContainer(
         }
     }
 
-    fun githubContainerRegistry(username: String) {
+    fun githubContainerRegistry(githubUsername: String) {
         if (GITHUB_CONTAINER_REGISTRY !in names) register(GITHUB_CONTAINER_REGISTRY)
 
         named(GITHUB_CONTAINER_REGISTRY) {
-            imageTagPrefix = "ghcr.io/$username"
+            imageTagPrefix = "ghcr.io/$githubUsername"
         }
     }
+
+    fun ghcr(githubUsername: String) = githubContainerRegistry(githubUsername)
 
     fun googleArtifactRegistry(
         projectId: String,
         region: String,
-        repositoryName: String,
+        registryName: String,
     ) {
         if (GOOGLE_ARTIFACT_REGISTRY !in names) register(GOOGLE_ARTIFACT_REGISTRY)
 
         named(GOOGLE_ARTIFACT_REGISTRY) {
-            imageTagPrefix = "$region-docker.pkg.dev/$projectId/$repositoryName"
+            imageTagPrefix = "$region-docker.pkg.dev/$projectId/$registryName"
         }
     }
 }

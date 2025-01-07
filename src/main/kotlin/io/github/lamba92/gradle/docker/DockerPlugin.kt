@@ -82,24 +82,21 @@ private fun Project.configurePlugin(
     dockerBuildxPublishAllTask: TaskProvider<Task>,
 ) {
     dockerExtension.images.all {
-        val dockerPrepareTaskName = "dockerPrepare${imageName.get().toCamelCase()}"
-
         val dockerPrepareDir =
             project
                 .layout
                 .buildDirectory
-                .dir("docker/prepare/${imageName.get()}")
+                .dir("docker/prepare/$name")
 
         val dockerPrepareTask =
-            tasks.register<Sync>(dockerPrepareTaskName) {
+            tasks.register<Sync>("dockerPrepare${name.toCamelCase()}") {
                 with(files.get())
                 into(dockerPrepareDir)
             }
 
         val baseTag = imageName.map { "$it:${imageVersion.orNull ?: project.version}" }
-        val dockerBuildTaskName = "dockerBuild${imageName.get().toCamelCase()}"
         val dockerBuildTask =
-            tasks.register<Exec>(dockerBuildTaskName) {
+            tasks.register<Exec>("dockerBuild${name.toCamelCase()}") {
                 group = "build"
                 dependsOn(dockerPrepareTask)
                 inputs.dir(dockerPrepareDir)
@@ -143,7 +140,7 @@ private fun Project.configurePlugin(
             dockerPrepareTask = dockerPrepareTask,
         )
 
-        val dockerRunTaskName = "dockerRun${imageName.get().toCamelCase()}"
+        val dockerRunTaskName = if (name == "main") "dockerRun" else "dockerRun${name.toCamelCase()}"
         tasks.register<Exec>(dockerRunTaskName) {
             group = "docker"
             dependsOn(dockerBuildTask)
@@ -162,8 +159,6 @@ private fun Project.configureBuildx(
     dockerBuildxPublishAllTask: TaskProvider<Task>,
     dockerPrepareTask: TaskProvider<Sync>,
 ) {
-    val dockerBuildxTaskName = "dockerBuildxBuild${dockerImage.imageName.get().toCamelCase()}"
-
     fun buildxArgs(publish: Boolean) =
         buildList {
             addAll("buildx", "build")
@@ -189,7 +184,7 @@ private fun Project.configureBuildx(
         }
 
     val dockerBuildxBuildTask =
-        tasks.register<Exec>(dockerBuildxTaskName) {
+        tasks.register<Exec>("dockerBuildxBuild${dockerImage.name.toCamelCase()}") {
             group = "build"
             executable = "docker"
             args(buildxArgs(false))
@@ -217,7 +212,7 @@ private fun Project.configureBuildxPublishing(
 ) {
     dockerExtension.registries.all {
         val dockerBuildxPublishTaskName =
-            "dockerBuildxPublish${dockerImage.imageName.get().toCamelCase()}To${registryName.toCamelCase()}"
+            "dockerBuildxPublish${dockerImage.name.toCamelCase()}To${registryName.toCamelCase()}"
         val dockerBuildxPublishTask =
             tasks.register<Exec>(dockerBuildxPublishTaskName) {
                 dependsOn(dockerPrepareTask)
@@ -225,7 +220,7 @@ private fun Project.configureBuildxPublishing(
                 executable = "docker"
                 args(buildxArgs(true))
             }
-        val publishAllBuildxToThisRepositoryTaskName = "publishAllBuildxImagesTo$registryName"
+        val publishAllBuildxToThisRepositoryTaskName = "publishAllBuildxImagesTo${registryName.toCamelCase()}"
         val publishAllToThisRepositoryTask =
             tasks.getOrRegister(publishAllBuildxToThisRepositoryTaskName) {
                 group = "publishing"
@@ -247,18 +242,16 @@ private fun Project.configurePublication(
     dockerBuildTask: TaskProvider<Exec>,
 ) {
     dockerExtension.registries.all {
-        val dockerPublishTaskName = "dockerPublish${dockerImage.imageName.get()}To$registryName"
         val dockerPublishTask =
-            tasks.register<Exec>(dockerPublishTaskName) {
+            tasks.register<Exec>("dockerPublish${dockerImage.name.toCamelCase()}To${registryName.toCamelCase()}") {
                 dependsOn(dockerBuildTask)
                 group = "publishing"
                 executable = "docker"
                 args("push", "${imageTagPrefix.get().suffixIfNot("/")}${baseTag.get()}")
             }
 
-        val publishAllToThisRepositoryTaskName = "publishAllImagesTo$registryName"
         val publishAllToThisRepositoryTask =
-            tasks.getOrRegister(publishAllToThisRepositoryTaskName) {
+            tasks.getOrRegister("publishAllImagesTo${registryName.toCamelCase()}") {
                 group = "publishing"
             }
         publishAllToThisRepositoryTask {

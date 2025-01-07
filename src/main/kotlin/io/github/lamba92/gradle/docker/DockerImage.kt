@@ -5,6 +5,7 @@ package io.github.lamba92.gradle.docker
 import org.gradle.api.Named
 import org.gradle.api.Project
 import org.gradle.api.distribution.plugins.DistributionPlugin
+import org.gradle.api.file.CopySourceSpec
 import org.gradle.api.file.CopySpec
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
@@ -56,7 +57,7 @@ class DockerImage(
     val files =
         project.objects.property<CopySpec>()
 
-    fun files(action: CopySpec.() -> Unit) {
+    fun files(action: CopySourceSpec.() -> Unit) {
         files =
             project.copySpec {
                 files.orNull?.let { with(it) }

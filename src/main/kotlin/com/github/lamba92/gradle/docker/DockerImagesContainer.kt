@@ -1,4 +1,4 @@
-package com.github.lamba92.gradle.docker
+package io.github.lamba92.gradle.docker
 
 import org.gradle.api.NamedDomainObjectContainer
 

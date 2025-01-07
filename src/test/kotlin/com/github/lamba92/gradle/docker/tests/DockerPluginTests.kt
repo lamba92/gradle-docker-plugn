@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.github.lamba92.gradle.docker.tests
+package io.github.lamba92.gradle.docker.tests
 
 val testProjectPath
     get() =

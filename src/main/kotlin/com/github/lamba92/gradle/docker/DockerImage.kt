@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-unused-imports")
 
-package com.github.lamba92.gradle.docker
+package io.github.lamba92.gradle.docker
 
 import org.gradle.api.Named
 import org.gradle.api.Project

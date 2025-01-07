@@ -6,7 +6,7 @@ import java.io.File
 
 class DockerTests {
     @Test
-    fun runDockerBuild() {
+    fun dockerBuild() {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(File(testProjectPath))
@@ -16,12 +16,24 @@ class DockerTests {
     }
 
     @Test
-    fun runDockerPush() {
+    fun dockerPush() {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(File(testProjectPath))
             .forwardOutput()
             .withArguments(":dockerPush")
             .build()
+    }
+
+    @Test
+    fun dockerRun() {
+        val result =
+            GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(File(testProjectPath))
+                .forwardOutput()
+                .withArguments(":dockerRun")
+                .build()
+        assert("Hello Kotlin!" in result.output)
     }
 }

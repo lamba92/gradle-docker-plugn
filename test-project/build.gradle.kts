@@ -3,7 +3,7 @@
 plugins {
     kotlin("jvm") version "2.0.21"
     application
-    id("com.github.lamba92.docker")
+    id("io.github.lamba92.docker")
 }
 
 group = "com.github.lamba92"

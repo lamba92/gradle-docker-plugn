@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-group = "com.github.lamba92"
+group = "io.github.lamba92"
 
 val githubRef =
     System.getenv("GITHUB_EVENT_NAME")
@@ -33,7 +33,7 @@ gradlePlugin {
     vcsUrl = "https://github.com/lamba92/gradle-docker-plugn"
     plugins {
         create("dockerPlugin") {
-            id = "com.github.lamba92.docker"
+            id = "io.github.lamba92.docker"
             displayName = "Gradle Docker Plugin"
             implementationClass = "com.github.lamba92.gradle.docker.DockerPlugin"
             tags = listOf("docker", "ci/cd", "container", "jvm")

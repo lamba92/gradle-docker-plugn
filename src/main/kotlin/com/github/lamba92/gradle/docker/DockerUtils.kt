@@ -59,7 +59,7 @@ fun getJavaMajorVersion(): String {
     return when (val majorVersion = javaVersion?.substringBefore('.')) {
         // If the first part is `1` (Java 8 or below), get the second number
         "1" -> javaVersion.substringAfter('.').substringBefore('.')
-        null -> "8"
+        null -> "21"
         else -> majorVersion
     }
 }

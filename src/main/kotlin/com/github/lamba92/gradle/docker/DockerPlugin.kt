@@ -95,11 +95,8 @@ private fun Project.configurePlugin(
                 with(files.get())
                 into(dockerPrepareDir)
             }
-        val baseTag =
-            provider {
-                val actualImageVersion = imageVersion.orElse(project.version.toString()).get()
-                "${imageName.get()}:$actualImageVersion"
-            }
+
+        val baseTag = imageName.map { "$it:${imageVersion.orNull ?: project.version}" }
         val dockerBuildTaskName = "dockerBuild${imageName.get().toCamelCase()}"
         val dockerBuildTask =
             tasks.register<Exec>(dockerBuildTaskName) {
@@ -145,6 +142,14 @@ private fun Project.configurePlugin(
             dockerBuildxPublishAllTask = dockerBuildxPublishAllTask,
             dockerPrepareTask = dockerPrepareTask,
         )
+
+        val dockerRunTaskName = "dockerRun${imageName.get().toCamelCase()}"
+        tasks.register<Exec>(dockerRunTaskName) {
+            group = "docker"
+            dependsOn(dockerBuildTask)
+            executable = "docker"
+            args("run", "--rm", baseTag.get().toString())
+        }
     }
 }
 

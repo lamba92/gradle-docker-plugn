@@ -1,4 +1,4 @@
-package com.github.lamba92.gradle.docker.tests
+package io.github.lamba92.gradle.docker.tests
 
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test

@@ -29,13 +29,13 @@ kotlin {
 }
 
 gradlePlugin {
-    website = "https://github.com/lamba92/gradle-docker-plugn"
-    vcsUrl = "https://github.com/lamba92/gradle-docker-plugn"
+    website = "https://github.com/lamba92/gradle-docker-plugin"
+    vcsUrl = "https://github.com/lamba92/gradle-docker-plugin"
     plugins {
         create("dockerPlugin") {
             id = "io.github.lamba92.docker"
             displayName = "Gradle Docker Plugin"
-            implementationClass = "com.github.lamba92.gradle.docker.DockerPlugin"
+            implementationClass = "io.github.lamba92.gradle.docker.DockerPlugin"
             tags = listOf("docker", "ci/cd", "container", "jvm")
             description = "Integrate seamlessly Docker in your build."
         }

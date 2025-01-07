@@ -14,7 +14,7 @@ kotlin {
 }
 
 application {
-    mainClass = "com.github.lamba92.gradle.docker.tests.MainKt"
+    mainClass = "io.github.lamba92.gradle.docker.tests.MainKt"
 }
 
 docker {

@@ -6,10 +6,9 @@ import org.gradle.kotlin.dsl.property
 
 class DockerRegistry(
     val registryName: String,
-    objectFactory: ObjectFactory
+    objectFactory: ObjectFactory,
 ) : Named {
     val imageTagPrefix = objectFactory.property<String>()
-    val url = objectFactory.property<String>()
 
     override fun getName() = registryName
 }

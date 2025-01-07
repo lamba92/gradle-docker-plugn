@@ -8,30 +8,31 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
-open class CreateJvmDockerfile @Inject constructor(objects: ObjectFactory) : DefaultTask() {
+open class CreateJvmDockerfile
+    @Inject
+    constructor(objects: ObjectFactory) : DefaultTask() {
+        @get:OutputFile
+        val destinationFile = objects.fileProperty()
 
-    @get:OutputFile
-    val destinationFile = objects.fileProperty()
+        @get:Input
+        val imageName = objects.property<String>()
 
-    @get:Input
-    val imageName = objects.property<String>()
+        @get:Input
+        val imageTag = objects.property<String>()
 
-    @get:Input
-    val imageTag = objects.property<String>()
+        @get:Input
+        val appName = objects.property<String>()
 
-    @get:Input
-    val appName = objects.property<String>()
-
-    @TaskAction
-    fun writeFile() {
-        destinationFile.get()
-            .asFile
-            .writeText(
-                jvmAppDockerImageString(
-                    imageName = imageName.get(),
-                    imageTag = imageTag.get(),
-                    appName = appName.get()
+        @TaskAction
+        fun writeFile() {
+            destinationFile.get()
+                .asFile
+                .writeText(
+                    jvmAppDockerImageString(
+                        imageName = imageName.get(),
+                        imageTag = imageTag.get(),
+                        appName = appName.get(),
+                    ),
                 )
-            )
+        }
     }
-}

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-unused-imports")
+
 package com.github.lamba92.gradle.docker
 
 import org.gradle.api.Named
@@ -16,8 +18,12 @@ import org.gradle.kotlin.dsl.property
 
 class DockerImage(
     private val name: String,
-    private val project: Project
+    private val project: Project,
 ) : Named {
+    val isLatestTag: Property<Boolean> =
+        project.objects
+            .property<Boolean>()
+            .convention(true)
 
     val imageName: Property<String> =
         project.objects
@@ -32,21 +38,24 @@ class DockerImage(
         project.objects.mapProperty()
 
     val platforms: ListProperty<DockerPlatform> =
-        project.objects.listProperty()
+        project.objects
+            .listProperty<DockerPlatform>()
+            .convention(DockerPlatform.defaults())
 
     val files =
         project.objects.property<CopySpec>()
 
     fun files(action: CopySpec.() -> Unit) {
-        files = project.copySpec {
-            files.orNull?.let { with(it) }
-            action()
-        }
+        files =
+            project.copySpec {
+                files.orNull?.let { with(it) }
+                action()
+            }
     }
 
     fun configureJvmApplication(
         baseImageName: String = "openjdk",
-        baseImageTag: String? = null
+        baseImageTag: String? = null,
     ) {
         val hasApplicationPlugin = project.plugins.hasPlugin("org.gradle.application")
         if (!hasApplicationPlugin) {
@@ -56,13 +65,14 @@ class DockerImage(
 
         val actualJdkVersion = baseImageTag ?: "${getJavaMajorVersion()}-alpine"
 
-        val createDockerfileTaskName = buildString {
-            append("create")
-            append(project.name.toCamelCase())
-            append(baseImageName.toCamelCase())
-            append(actualJdkVersion)
-            append("JvmAppDockerfile")
-        }
+        val createDockerfileTaskName =
+            buildString {
+                append("create")
+                append(project.name.toCamelCase())
+                append(baseImageName.toCamelCase())
+                append(actualJdkVersion.toCamelCase())
+                append("JvmAppDockerfile")
+            }
 
         val createDockerfileTask =
             project.tasks.getOrRegister<CreateJvmDockerfile>(createDockerfileTaskName) {

@@ -3,7 +3,7 @@
 plugins {
     kotlin("jvm") version "2.0.21"
     application
-    id("gradle-docker-plugin")
+    id("com.github.lamba92.docker")
 }
 
 group = "com.github.lamba92"
@@ -19,11 +19,7 @@ application {
 
 docker {
     registries {
-        create("local") {
-            url = "http://registry"
-            imageTagPrefix = "registry"
-        }
+        System.getenv("REPOSITORY_OWNER")
+            ?.let { githubContainerRegistry(it) }
     }
 }
-
-println("SCRIPT PROJECT VERSION: $version")

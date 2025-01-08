@@ -26,6 +26,7 @@ kotlin {
     target {
         withSourcesJar(true)
     }
+    explicitApi()
 }
 
 gradlePlugin {

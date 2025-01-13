@@ -4,7 +4,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
 }
 
-rootProject.name = "gradle-docker-plugin-repository"
+rootProject.name = "gradle-docker-plugin"
 
 dependencyResolutionManagement {
     repositories {
@@ -12,6 +12,9 @@ dependencyResolutionManagement {
         gradlePluginPortal()
     }
     rulesMode = RulesMode.FAIL_ON_PROJECT_RULES
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
-include("example")
-includeBuild("plugin")

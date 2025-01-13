@@ -79,16 +79,9 @@ docker {
         main { 
             imageName = project.name // default
             imageTag = project.version.toString() // default
-            isLatestTag = true // default, if true, the image will also be tagged as `latest`
+            isLatestTag = true // default, if true, the image will have an additional tag`latest`
             buildArgs = emptyMap() // default
             platforms = listOf("linux/amd64", "linux/arm64") // default, used for task `dockerBuildxBuild` and `dockerBuildxPublish`
-            
-            // Configure this image to run the JVM application provided by the `application` plugin; the Dockerfile will be generated automagically.
-            // On the `main` image, this is the default configuration if the `application` plugin is applied.
-            configureJvmApplication(
-                baseImageName = "eclipse-temurin", // default
-                baseImageTag = "21-alpine", // default
-            )
         }
         
         // you can define as many images as you want and configure them as you like
@@ -105,6 +98,18 @@ docker {
                 from("path/to/Dockerfile")
             }
         }
+    }
+
+    // Configure an image to run the JVM application provided by the `application` plugin; the Dockerfile will be generated automagically.
+    // On the `main` image, this is the default configuration if the `application` plugin is applied.
+    configureJvmApplication(images.main) { // this: CreateJvmDockerfile
+        baseImageName = "eclipse-temurin" // default
+        baseImageTag = "21-alpine" // default
+
+        additionalConfig = 
+            """
+            RUN echo "Hello, World!"
+            """.trimIndent()
     }
 }
 ```

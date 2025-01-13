@@ -22,7 +22,7 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
-      - run: ./gradlew --no-build-cache ktlintCheck
+      - run: ./gradlew --no-build-cache ktlintCheck :plugin:ktlintCheck
 
   tests:
     continue-on-error: true
@@ -40,14 +40,10 @@ jobs:
         with:
           distribution: adopt
           java-version: 21
-      - run: ./gradlew test --stacktrace
+      - run: ./gradlew :example:dockerPublish :example:dockerBuildxPublish
         env:
           REPOSITORY_OWNER: ${{ github.repository_owner }}
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: tests-results-ubuntu
-          path: build/reports
+          IMAGE_VERSION: ${{ github.run_id }}-${{ github.run_number }}
 
   publication:
     runs-on: ubuntu-latest
@@ -60,7 +56,7 @@ jobs:
         with:
           distribution: adopt
           java-version: 21
-      - run: ./gradlew publishAllPublicationsToTestRepository
+      - run: ./gradlew :plugin:publishAllPublicationsToTestRepository
       - uses: actions/upload-artifact@v4
         with:
           name: publication-results-ubuntu

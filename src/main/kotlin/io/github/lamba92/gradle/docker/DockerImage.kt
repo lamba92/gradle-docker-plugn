@@ -16,6 +16,7 @@ import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
+import org.intellij.lang.annotations.Language
 
 /**
  * Represents a Docker image configuration within a Gradle project. This class allows setting and managing
@@ -88,10 +89,13 @@ public class DockerImage(
      *
      * @param baseImageName The name of the base Docker image to use for the application. Defaults to "eclipse-temurin".
      * @param baseImageTag The tag of the base Docker image to use for the application. Defaults to "21-alpine".
+     * @param additionalConfiguration Any additional configuration to append to the dockerfile.
      */
     public fun configureJvmApplication(
         baseImageName: String = "eclipse-temurin",
         baseImageTag: String = "21-alpine",
+        @Language("Dockerfile")
+        additionalConfiguration: String? = null,
     ) {
         val hasApplicationPlugin = project.plugins.hasPlugin("org.gradle.application")
         if (!hasApplicationPlugin) {
@@ -113,6 +117,7 @@ public class DockerImage(
                 appName = project.name
                 imageTag = baseImageTag
                 imageName = baseImageName
+                additionalConfig = additionalConfiguration
                 destinationFile =
                     project
                         .layout

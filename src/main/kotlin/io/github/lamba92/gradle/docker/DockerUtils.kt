@@ -30,21 +30,24 @@ internal fun TaskContainer.getOrRegister(
  * @param imageName The base Docker image name.
  * @param imageTag The tag of the base Docker image.
  * @param appName The name of the JVM application.
+ * @param additionalConfiguration Any additional configuration to add to the Dockerfile.
  * @return A formatted Dockerfile string configured with the specified image details and application setup.
  */
 internal fun jvmAppDockerImageString(
     imageName: String,
     imageTag: String,
     appName: String,
+    additionalConfiguration: String? = null,
 ): String =
     """
-    FROM $imageName:$imageTag
-
-    COPY bin $appName/bin
-    COPY lib $appName/lib
-
-    CMD ["$appName/bin/$appName"]
-    """.trimIndent()
+    |FROM $imageName:$imageTag
+    |
+    |COPY bin $appName/bin
+    |COPY lib $appName/lib
+    |
+    |CMD ["$appName/bin/$appName"]
+    |${(additionalConfiguration?.replace("\n", "\n    |")) ?: ""}
+    """.trimMargin()
 
 public fun getJvmAppErrorMessage(
     imageName: String,
@@ -64,7 +67,7 @@ public fun getJvmAppErrorMessage(
 internal fun <T> MutableList<T>.addAll(vararg elements: T) = addAll(elements)
 
 internal fun String.toCamelCase() =
-    split(Regex("[\\s\\-_.]+")) // Split by spaces, hyphens, underscores, or dots
+    split(Regex("[\\s\\-_./]+")) // Split by spaces, hyphens, underscores, slashes, or dots
         .filter { it.isNotEmpty() } // Remove empty segments
         .joinToString("") { it.lowercase().capitalized() }
 

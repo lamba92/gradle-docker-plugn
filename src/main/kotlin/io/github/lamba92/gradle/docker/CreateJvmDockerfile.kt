@@ -23,7 +23,7 @@ import javax.inject.Inject
  * @property imageName The name of the base Docker image to use.
  * @property imageTag The tag of the base Docker image to use.
  * @property appName The name of the application to include in the Dockerfile.
- *
+ * @property additionalConfig Any additional configuration to include in the Dockerfile.
  */
 public open class CreateJvmDockerfile
     @Inject
@@ -40,6 +40,9 @@ public open class CreateJvmDockerfile
         @get:Input
         public val appName: Property<String> = objects.property<String>()
 
+        @get:Input
+        public val additionalConfig: Property<String?> = objects.property<String?>()
+
         /**
          * Writes the content of a Dockerfile for a JVM application to the specified [destinationFile].
          *
@@ -55,6 +58,7 @@ public open class CreateJvmDockerfile
                         imageName = imageName.get(),
                         imageTag = imageTag.get(),
                         appName = appName.get(),
+                        additionalConfiguration = additionalConfig.get(),
                     ),
                 )
         }
